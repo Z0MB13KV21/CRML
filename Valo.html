@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Selector Mapa - Torneo Valorant</title>
+        <!-- Bootstrap CSS -->
+        <link rel="shortcut icon" href="Valo.ico" />.
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+        <!-- Google Font: Rajdhani -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"
+            rel="stylesheet">
+        <style>
+
+        body {
+            background: url('valorant.png') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            font-family: 'Rajdhani';
+        }
+
+        .map-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .map-card {
+            position: relative;
+            width: 200px;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .map-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .map-card .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 26, 34, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
+        }
+
+        .map-card p {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 2;
+            color: white;
+            transition: opacity 0.3s ease;
+        }
+
+        .map-card:hover .overlay {
+            opacity: 0;
+        }
+
+        .map-actions {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .map-actions input {
+            margin: 0 5px;
+        }
+
+        .map-columns {
+            margin-top: 20px;
+            background-color: rgba(18, 26, 34, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #banned-list li,
+        #picked-list li {
+            position: relative;
+            list-style: none;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #banned-list li::before,
+        #picked-list li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 26, 34, 0.5);
+            z-index: 0;
+        }
+
+        #banned-list li span,
+        #picked-list li span {
+            position: relative;
+            z-index: 2;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .btn-delete {
+            background-color: #fb4454;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .btn-delete:hover {
+            background-color: #d23344;
+        }
+        .contenedor {
+                padding: 10px;
+                max-width: calc(100% - 20px);
+                margin: auto;
+                margin-top: 50px;
+                color: #fff;
+                font-family: 'Rajdhani';
+                text-transform: uppercase;
+                font-size: 2rem;
+            }
+            .equipos {
+                margin-top: 20px;
+                text-align: center;
+                margin: auto;
+                position: relative;
+            }
+            h1 {
+                text-align: center;
+                font-family: 'Rajdhani';
+                text-transform: uppercase;
+            }
+            canvas {
+                width: 700px;
+                height: 700px;
+                margin-top: 10px;
+                position: relative;
+                z-index: 1;
+            }
+            
+            .arrow {
+                position: absolute;
+                top: 10px; /* Ajustar posición vertical */
+                left: 50%; /* Centrar horizontalmente */
+                transform: translate(-50%, 0) rotate(180deg); /* Rotar y centrar */
+                width: 0;
+                height: 0;
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-bottom: 20px solid rgb(0, 238, 255);
+                z-index: 2;
+            }
+            textarea {
+                text-align: center;
+                text-transform: uppercase;
+                width: 100%;
+                min-height: 40px; /* Altura mínima para 2 renglones */
+                max-height: 100px; /* Altura máxima para 2 renglones */
+                overflow: hidden; /* Ocultar texto adicional */
+                resize: none; /* Desactivar el redimensionamiento */
+                margin-bottom: 10px;
+                font-family: 'Rajdhani';
+            }
+            .video-overlay {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 15%; /* Ajusta el tamaño del video */
+    height: auto;
+    z-index: 2; /* Asegura que esté frente al contenido */
+    mix-blend-mode: lighten; /* Filtro de fusión con el fondo */
+    opacity: 1; /* Transparencia para mayor efecto */
+    pointer-events: none; /* Evita que el video interfiera con clics en la página */
+}
+.always-on-top {
+    position: fixed; /* Siempre en la misma posición */
+    top: 20px; /* Distancia desde la parte superior */
+    left: 50%; /* Centrado horizontalmente */
+    transform: translateX(-50%); /* Ajusta el centrado */
+    z-index: 9999; /* Asegura que esté sobre todo */
+    font-size: 3rem; /* Tamaño del texto */
+    color: #ffffff;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Sombra para mejorar la visibilidad */
+    text-align: center;
+}
+.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+
+    </style>
+
+    </head>
+    <body> <video class="video-overlay" autoplay muted loop>
+            <source src="patrocinadores.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+        </video>
+        <h1 class="always-on-top">Costa Rica Masters League</h1>
+        <div class="contenedor">
+
+            <textarea id="nombreInput" placeholder="Ingrese los equipos"
+                oninput="actualizarLista()"></textarea>
+            <div class="equipos">
+                <canvas id="idcanvas" width="500" height="500"></canvas>
+                <div class="arrow"></div>
+            </div>
+        </div>
+        <script type="text/javascript">
+        let array_Equipos = [];
+        let pos_ini = 0;
+        let movement;
+
+        function actualizarLista() {
+            let input = document.getElementById("nombreInput").value.trim();
+            let nombres = input.split("\n").filter(nombre => nombre !== "");
+            
+            // Limitar a un máximo de 2 nombres
+            if (nombres.length > 2) {
+                nombres = nombres.slice(0, 2);
+                document.getElementById("nombreInput").value = nombres.join("\n");
+            }
+
+            array_Equipos = nombres;
+
+            // Habilitar o deshabilitar la función de sorteo
+            if (array_Equipos.length >= 2) {
+                dibujarRuleta();
+                document.getElementById("idcanvas").style.cursor = "pointer";
+            } else {
+                document.getElementById("idcanvas").style.cursor = "not-allowed";
+            }
+        }
+        window.onload = function() {
+    dibujarRuleta(); // Llamar a la función para dibujar la ruleta cuando la página carga
+};
+        function dibujarRuleta() {
+            let canvas = document.getElementById("idcanvas");
+            let context = canvas.getContext("2d");
+            let center = canvas.width / 2;
+
+            context.clearRect(0, 0, canvas.width, canvas.height); // Limpiar canvas
+            context.beginPath();
+            context.moveTo(center, center);
+            context.arc(center, center, center - 10, 0, 2 * Math.PI);
+            context.lineTo(center, center);
+            context.fillStyle = 'rgba(18, 26, 34, 0.8)'; // Fondo de la ruleta
+            context.fill();
+
+            // Colores fijos para las secciones
+            const colors = ['#fb4454', 'rgba(18, 26, 34, 0.8)'];
+
+            for (let i = 0; i < array_Equipos.length; i++) {
+                context.beginPath();
+                context.moveTo(center, center);
+                context.arc(center, center, center - 20, i * 2 * Math.PI / array_Equipos.length, (i + 1) * 2 * Math.PI / array_Equipos.length);
+                context.lineTo(center, center);
+                context.fillStyle = colors[i % colors.length]; // Alternar entre los colores
+                context.fill();
+
+                context.save();
+                context.translate(center, center);
+                context.rotate(3 * 2 * Math.PI / (5 * array_Equipos.length) + i * 2 * Math.PI / array_Equipos.length);
+                context.translate(-center, -center);
+                context.font = "30px Rajdhani";
+                context.textAlign = "right";
+                context.fillStyle = "white";
+                context.fillText(array_Equipos[i].toUpperCase(), canvas.width - 30, center);
+                context.restore();
+            }
+        }
+
+        function sortear() {
+            if (array_Equipos.length < 2) {
+
+                return;
+            }
+
+            let canvas = document.getElementById("idcanvas");
+            let startTime = Date.now();
+            let duration = 6000; // Duración de 6 segundos
+
+            movement = setInterval(function () {
+                let elapsedTime = Date.now() - startTime;
+                let progress = elapsedTime / duration;
+                if (progress > 1) progress = 1;
+
+                let easedProgress = easeInOutQuad(progress);
+
+                pos_ini += easedProgress * 360;
+                canvas.style.transform = 'rotate(' + pos_ini + 'deg)';
+
+                if (progress === 1) {
+                    clearInterval(movement);
+                }
+            }, 10);
+        }
+
+        function easeInOutQuad(t) {
+            if (t < 0.5) return 2 * t * t;
+            return -1 + (4 - 2 * t) * t;
+        }
+
+        document.getElementById("idcanvas").addEventListener("click", sortear);
+    </script>
+
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+
+        <br>
+        <div class="container py-4">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <div class="map-container">
+
+                <!-- All maps -->
+                <div>
+                    <div class="map-card">
+                        <img src="sunset.png" alt="Sunset">
+                        <div class="overlay">
+                            <p>Sunset</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Sunset" value="ban"
+                            onclick="moveMap('Sunset', 'sunset.png', 'ban')">
+                        Ban
+                        <input type="radio" name="Sunset" value="pick"
+                            onclick="moveMap('Sunset', 'sunset.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="split.png" alt="Split">
+                        <div class="overlay">
+                            <p>Split</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Split" value="ban"
+                            onclick="moveMap('Split', 'split.png', 'ban')"> Ban
+                        <input type="radio" name="Split" value="pick"
+                            onclick="moveMap('Split', 'split.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="pearl.png" alt="Pearl">
+                        <div class="overlay">
+                            <p>Pearl</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Pearl" value="ban"
+                            onclick="moveMap('Pearl', 'pearl.png', 'ban')"> Ban
+                        <input type="radio" name="Pearl" value="pick"
+                            onclick="moveMap('Pearl', 'pearl.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="lotus.png" alt="Lotus">
+                        <div class="overlay">
+                            <p>Lotus</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Lotus" value="ban"
+                            onclick="moveMap('Lotus', 'lotus.png', 'ban')"> Ban
+                        <input type="radio" name="Lotus" value="pick"
+                            onclick="moveMap('Lotus', 'lotus.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="icebox.png" alt="Icebox">
+                        <div class="overlay">
+                            <p>Icebox</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Icebox" value="ban"
+                            onclick="moveMap('Icebox', 'icebox.png', 'ban')">
+                        Ban
+                        <input type="radio" name="Icebox" value="pick"
+                            onclick="moveMap('Icebox', 'icebox.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="haven.png" alt="Haven">
+                        <div class="overlay">
+                            <p>Haven</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Haven" value="ban"
+                            onclick="moveMap('Haven', 'haven.png', 'ban')"> Ban
+                        <input type="radio" name="Haven" value="pick"
+                            onclick="moveMap('Haven', 'haven.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="breeze.png" alt="Breeze">
+                        <div class="overlay">
+                            <p>Breeze</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Breeze" value="ban"
+                            onclick="moveMap('Breeze', 'breeze.png', 'ban')">
+                        Ban
+                        <input type="radio" name="Breeze" value="pick"
+                            onclick="moveMap('Breeze', 'breeze.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="bind.png" alt="Bind">
+                        <div class="overlay">
+                            <p>Bind</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Bind" value="ban"
+                            onclick="moveMap('Bind', 'bind.png', 'ban')"> Ban
+                        <input type="radio" name="Bind" value="pick"
+                            onclick="moveMap('Bind', 'bind.png', 'pick')"> Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="ascent.png" alt="Ascent">
+                        <div class="overlay">
+                            <p>Ascent</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Ascent" value="ban"
+                            onclick="moveMap('Ascent', 'ascent.png', 'ban')">
+                        Ban
+                        <input type="radio" name="Ascent" value="pick"
+                            onclick="moveMap('Ascent', 'ascent.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+
+                <div>
+                    <div class="map-card">
+                        <img src="fracture.png" alt="Fracture">
+                        <div class="overlay">
+                            <p>Fracture</p>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <input type="radio" name="Fracture" value="ban"
+                            onclick="moveMap('Fracture', 'fracture.png', 'ban')">
+                        Ban
+                        <input type="radio" name="Fracture" value="pick"
+                            onclick="moveMap('Fracture', 'fracture.png', 'pick')">
+                        Pick
+                    </div>
+                </div>
+            </div>
+
+            <div class="row map-columns justify-content-center mt-4">
+                <div class="col-md-5 map-columns">
+                    <h4>Baneado</h4>
+                    <ul id="banned-list" class="list-group"></ul>
+                </div>
+                <div class="col-md-5 map-columns">
+                    <h4>Pickeado</h4>
+                    <ul id="picked-list" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <!-- Bootstrap JS and Popper.js -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+        function moveMap(mapName, mapImage, action) {
+            const bannedList = document.getElementById('banned-list');
+            const pickedList = document.getElementById('picked-list');
+    
+            // Buscar y desmarcar ambos radio buttons relacionados con el mapa.
+            const radioButtons = document.querySelectorAll(`input[type="radio"][name="${mapName}"]`);
+            radioButtons.forEach(radioButton => {
+                radioButton.checked = false;
+            });
+    
+            // Eliminar el elemento de la lista de prohibidos o seleccionados, si existe.
+            [...bannedList.children, ...pickedList.children].forEach(item => {
+                if (item.dataset.map === mapName) {
+                    item.remove();
+                }
+            });
+    
+            const newItem = document.createElement('li');
+            newItem.className = 'list-group-item';
+            newItem.dataset.map = mapName;
+            newItem.style.backgroundImage = `url('${mapImage}')`;
+    
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = mapName;
+    
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'btn-delete';
+            deleteButton.textContent = 'X';
+            deleteButton.onclick = () => {
+                // Desmarcar ambos radio buttons al eliminar el elemento.
+                const radioButtons = document.querySelectorAll(`input[type="radio"][name="${mapName}"]`);
+                radioButtons.forEach(radioButton => {
+                    radioButton.checked = false;
+                });
+                newItem.remove();
+            };
+    
+            newItem.appendChild(nameSpan);
+            newItem.appendChild(deleteButton);
+    
+            if (action === 'ban') {
+                bannedList.appendChild(newItem);
+            } else if (action === 'pick') {
+                pickedList.appendChild(newItem);
+            }
+        }
+    </script>
+        <script>
+    const contenedor = document.querySelector('.contenedor');
+    const container = document.querySelector('.container');
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        // Define las posiciones de activación
+        const contenedorTop = contenedor.offsetTop;
+        const containerTop = container.offsetTop;
+
+        // Mostrar solo "contenedor" si estás en su posición
+        if (scrollTop >= contenedorTop && scrollTop < containerTop) {
+            contenedor.classList.add('visible');
+            contenedor.classList.remove('hidden');
+            container.classList.add('hidden');
+            container.classList.remove('visible');
+        }
+        // Mostrar solo "container" si estás en su posición
+        else if (scrollTop >= containerTop) {
+            container.classList.add('visible');
+            container.classList.remove('hidden');
+            contenedor.classList.add('hidden');
+            contenedor.classList.remove('visible');
+        }
+    });
+</script>
+
+    </body>
+</html>
